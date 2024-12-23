@@ -1,5 +1,6 @@
 import argparse
 import json
+import os.path
 
 
 class bcolors:
@@ -14,7 +15,15 @@ class bcolors:
     UNDERLINE = '\033[4m'
 
 
-def scan_file(file_path, level=None, n_char=120):
+def scan_file(file, level=None, n_char=120):
+
+    if os.path.exists(file):
+        file_path = file
+    elif os.path.exists(f"security_scans/{file}"):
+        file_path = f"security_scans/{file}"
+    else:
+        raise FileNotFoundError(f"File {file} not found.")
+
     with open(file_path, "r") as f:
         scan_result = json.load(f)
 
@@ -23,12 +32,14 @@ def scan_file(file_path, level=None, n_char=120):
         for item in content:
             if level and item["level"] != level:
                 continue
+
             print(bcolors.FAIL + f"Level: {item['level']}" + bcolors.ENDC)
             print(bcolors.OKBLUE + f"Ref: {item['reference']}" + bcolors.ENDC)
             reason = item["reason"]
             print("Reason:")
             for i in range(0, len(reason), n_char):
                 print(bcolors.OKGREEN + reason[i:i + n_char] + bcolors.ENDC)
+
             user_input = input("Press 'n' for next issue, 'f' if you fixed the issue, or 'b' to go to the next file: ")
             if user_input == "b":
                 print("Skipping file...")
@@ -48,8 +59,8 @@ def scan_file(file_path, level=None, n_char=120):
 
 def main():
     parser = argparse.ArgumentParser(description="Scan source code for security issues.")
-    parser.add_argument("file", type=str, help="Directory to scan")
-    parser.add_argument("--level", type=str, default="", help="only show issues of this level")
+    parser.add_argument("file", type=str, help="File with scan results")
+    parser.add_argument("--level", type=str, help="only show issues of this level")
     args = parser.parse_args()
 
     scan_file(args.file, args.level)
