@@ -43,10 +43,8 @@ The output file of the security scan is a json file with the following format:
             "reference": "problematic lines (with numbers)",
             "level": "level of security issue: 1 (low) - 5 (high)",
             "reason": "explanation of the issue"
-        },
-      ...
-    ],
-  ...
+        }
+    ]
 }
 ```
 
